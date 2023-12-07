@@ -21,11 +21,14 @@ import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -179,26 +182,15 @@ class BleOperationsActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("InflateParams")
     private fun showWritePayloadDialog(characteristic: BluetoothGattCharacteristic) {
-        val hexField = layoutInflater.inflate(R.layout.edittext_hex_payload, null) as EditText
-        alert {
-            customView = hexField
-            isCancelable = false
-            yesButton {
-                with(hexField.text.toString()) {
-                    if (isNotBlank() && isNotEmpty()) {
-                        val bytes = hexToBytes()
-                        log("Writing to ${characteristic.uuid}: ${bytes.toHexString()}")
-                        ConnectionManager.writeCharacteristic(device, characteristic, bytes)
-                    } else {
-                        log("Please enter a hex payload to write to ${characteristic.uuid}")
-                    }
-                }
-            }
-            noButton {}
-        }.show()
-        hexField.showKeyboard()
+        val intent = Intent(this, ButtonActivity::class.java)
+
+// Assuming `characteristic` is your BluetoothCharacteristic
+        intent.putExtra("characteristic_key", characteristic)
+        intent.putExtra("device",device);
+        startActivity(intent)
     }
 
     private val connectionEventListener by lazy {
